@@ -1,3 +1,7 @@
+// Some global objects
+var allPieces = new Array;
+var turn = 0;
+
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
@@ -17,7 +21,7 @@ bgImage.onload = function () {
 };
 bgImage.src = "images/background_bw.png";
 
-// Some bookkeeping for the pieces
+// Some book keeping for the pieces
 colors=["white","black"];
 ncolors=colors.length; //obviously 2...
 piece_types=["pawn","bishop","knight","rook","queen","king"];
@@ -61,10 +65,6 @@ function select_class() {
     this.made=1;
   }
 };
-// THIS SHOULD BE DONE IN RESET!!!
-selection = new select_class();
-new_pos = new select_class(); // highlight last piece moved
-old_pos = new select_class(); // highlight previous position of last piece moved
 
 // Piece class
 function piece(color,type,file,rank) {
@@ -89,29 +89,6 @@ function piece(color,type,file,rank) {
     this.image.src = imag_paths[this.color][newType];
   }
 }
-
-// THIS SHOULD BE DONE IN RESET!
-// Instantiate some pieces! ... This is going to be done in a hacky way
-allPieces = new Array(ncolors);
-for (var ci=0;ci<ncolors;ci++){
-  allPieces[ci] = new Array(16);
-  piece_rank = 7*(1-ci); // Assuming white on bottom
-  pawn_rank = piece_rank + 2*ci - 1; // hacky hacky hacky
-  for (var pi=0;pi<8;pi++){
-    // First 8 are pawns
-    allPieces[ci][pi] = new piece(ci,0,pi,pawn_rank);
-  }
-  // The rest just do by hand
-  allPieces[ci][8]  = new piece(ci,1,2,piece_rank); // q's bishop
-  allPieces[ci][9]  = new piece(ci,1,5,piece_rank); // k's bishop
-  allPieces[ci][10] = new piece(ci,2,1,piece_rank); // q's knight
-  allPieces[ci][11] = new piece(ci,2,6,piece_rank); // k's knight
-  allPieces[ci][12] = new piece(ci,3,0,piece_rank); // q's rook
-  allPieces[ci][13] = new piece(ci,3,7,piece_rank); // k's rook
-  allPieces[ci][14] = new piece(ci,4,3,piece_rank); // q
-  allPieces[ci][15] = new piece(ci,5,4,piece_rank); // k
-}
-turn=0
 
 function getCursorPosition(e) {
   // hopefully return the .file and .rank of the clicked square
@@ -188,20 +165,33 @@ function boardClick(e) {
   }
   //selection.select(square.file,square.rank);
 }
-  
-// Handle keyboard controls
-var keysDown = {};
 
-addEventListener("keydown", function (e) {
-	keysDown[e.keyCode] = true;
-}, false);
-
-addEventListener("keyup", function (e) {
-	delete keysDown[e.keyCode];
-}, false);
-
-// Reset the game when the player catches a monster
 var reset = function () {
+  // reset selection objects
+  window.selection = new select_class();
+  window.new_pos = new select_class(); // highlight last piece moved
+  window.old_pos = new select_class(); // highlight previous position of last piece moved
+
+  // reset/initialize pieces
+  for (var ci=0;ci<ncolors;ci++){
+    allPieces[ci] = new Array(16);
+    piece_rank = 7*(1-ci); // Assuming white on bottom
+    pawn_rank = piece_rank + 2*ci - 1; // hacky hacky hacky
+    for (var pi=0;pi<8;pi++){
+      // First 8 are pawns
+      allPieces[ci][pi] = new piece(ci,0,pi,pawn_rank);
+    }
+    // The rest just do by hand
+    allPieces[ci][8]  = new piece(ci,1,2,piece_rank); // q's bishop
+    allPieces[ci][9]  = new piece(ci,1,5,piece_rank); // k's bishop
+    allPieces[ci][10] = new piece(ci,2,1,piece_rank); // q's knight
+    allPieces[ci][11] = new piece(ci,2,6,piece_rank); // k's knight
+    allPieces[ci][12] = new piece(ci,3,0,piece_rank); // q's rook
+    allPieces[ci][13] = new piece(ci,3,7,piece_rank); // k's rook
+    allPieces[ci][14] = new piece(ci,4,3,piece_rank); // q
+    allPieces[ci][15] = new piece(ci,5,4,piece_rank); // k
+  }
+
   render();
 };
 

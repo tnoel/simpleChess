@@ -122,6 +122,15 @@ function checkForPiece(square,color) {
   return -1;
 };
 
+function checkPawnPromote(color,pi) {
+  // check if pawn should be promoted, and if so promote it
+  curRank=allPieces[color][pi].rank;
+  if (curRank == 7*color) {
+    // it has reached the opposite rank, promote the sucker.
+    var promote_type=$('#promote_dialog').dialog("open"); // launches dialog and changes piece type
+  }
+}
+
 function boardClick(e) {
   var square = getCursorPosition(e);
   if (square.file < 0 || square.file > 7 || square.rank < 0 || square.rank > 7){
@@ -153,6 +162,9 @@ function boardClick(e) {
     allPieces[turn][selection.pi].move(square);
     new_pos.select(selection.color,selection.pi);
     selection.made=0;
+    if (allPieces[turn][selection.pi].type == 0){
+      checkPawnPromote(turn,selection.pi);
+    }
     // switch turn
     turn=1-turn;
 

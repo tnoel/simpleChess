@@ -10,3 +10,5 @@ There is one special thing about this game - it's a variation that I think may b
 Initial commit: So far the script is smart enough to handle the pieces, and even move them. The big things yet to be done are handling special moves (e.g. castling, promotion), and adding rules to check legality of moves. Once those tasks are done, it should be possible to use this as a board to play against someone sitting next to you. Maybe some day I'll add the ability to play online. I should also add various features like a reset button, logging, and ability to view previous moves.
 
 Promotion is now handled correctly. Had to add jquery, which will probably be helpful for other things too. Next step castling?
+
+Basic rules added. Most pieces will only move legally, notable exceptions: Castling, en passant, and no checking for check.

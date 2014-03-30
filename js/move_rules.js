@@ -51,19 +51,47 @@ checkBishopMoveRules = function(curFile,curRank,tarFile,tarRank) {
 };
   
 checkKnightMoveRules = function(curFile,curRank,tarFile,tarRank) {
-  return 1;
+  dFile = Math.abs(curFile-tarFile);
+  dRank = Math.abs(curRank-tarRank);
+  if (((dFile == 1) && (dRank == 2)) || ((dFile == 2) && (dRank == 1))) {
+    return 1; // No need to check path! woop.
+  };
+  return 0; // otherwise illegal
 };
   
 checkRookMoveRules = function(curFile,curRank,tarFile,tarRank) {
-  return 1;
+  // check that it's horizontal or vertical
+  if ((curFile == tarFile) || (curRank == tarRank)) {
+    // Check path
+    if (checkPath(curFile,curRank,tarFile,tarRank)) {
+      return 1;
+    }
+  }
+  return 0; // otherwise illegal
 };
   
 checkQueenMoveRules = function(curFile,curRank,tarFile,tarRank) {
-  return 1;
+  // check diagonal or horizontal or vertical
+  diag = Math.abs(curFile-tarFile) == Math.abs(curRank-tarRank);
+  horizvert = (curFile == tarFile) || (curRank == tarRank);
+  if (diag || horizvert){
+    // Then check the path
+    if (checkPath(curFile,curRank,tarFile,tarRank)) {
+      return 1;
+    }
+  }
+  return 0; // otherwise illegal
 };
   
 checkKingMoveRules = function(curFile,curRank,tarFile,tarRank) {
-  return 1;
+  // TODO: Check for castling!
+
+  dFile = Math.abs(curFile-tarFile);
+  dRank = Math.abs(curRank-tarRank);
+  if ((dFile <= 1) && (dRank <= 1)) {
+    return 1; // No need to check path! woop.
+  };
+  return 0; // otherwise illegal
 };
 
 // Array of the check functions

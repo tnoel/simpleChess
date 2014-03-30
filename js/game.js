@@ -146,8 +146,8 @@ function boardClick(e) {
       return;
     }
     // TODO: Check legality of move
-    ruleResult = isMoveLegal[allPieces[selection.color][selection.pi].type](selection.file,selection.rank,square.file, square.rank);
-    //alert(ruleResult);
+    ruleResult = isMoveLegal(allPieces[selection.color][selection.pi].type,selection.file,selection.rank,square.file, square.rank);
+    if (ruleResult == 0){ return; }
     // TODO: Check for special moves - promotion, castling
     // Next check for capture
     matched_pi=checkForPiece(square,1-turn);

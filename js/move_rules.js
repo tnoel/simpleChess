@@ -40,7 +40,14 @@ checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank) {
 };
   
 checkBishopMoveRules = function(curFile,curRank,tarFile,tarRank) {
-  return 1;
+  // First check if it's diagonal
+  if (Math.abs(curFile-tarFile) == Math.abs(curRank-tarRank)){
+    // Then check the path
+    if (checkPath(curFile,curRank,tarFile,tarRank)) {
+      return 1;
+    }
+  }
+  return 0; // otherwise illegal
 };
   
 checkKnightMoveRules = function(curFile,curRank,tarFile,tarRank) {
@@ -60,5 +67,33 @@ checkKingMoveRules = function(curFile,curRank,tarFile,tarRank) {
 };
 
 // Array of the check functions
-var isMoveLegal = new Array(checkPawnMoveRules, checkBishopMoveRules, checkKnightMoveRules, checkRookMoveRules, checkQueenMoveRules, checkKingMoveRules);
+var pieceMoveRules =  new Array(checkPawnMoveRules, checkBishopMoveRules, checkKnightMoveRules, checkRookMoveRules, checkQueenMoveRules, checkKingMoveRules);
 
+sign = function(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; };
+
+checkPath = function(curFile,curRank,tarFile,tarRank) {
+  dFile=sign(tarFile-curFile);
+  dRank=sign(tarRank-curRank);
+  tempFile=curFile+dFile;
+  tempRank=curRank+dRank;
+  while ((tempFile != tarFile) || (tempRank != tarRank)){
+    match1=checkForPiece({file:tempFile,rank:tempRank},turn);
+    match2=checkForPiece({file:tempFile,rank:tempRank},1-turn);
+    if ((match1 >= 0) || match2 >= 0){
+      return 0;
+    } else {
+      tempFile += dFile;
+      tempRank += dRank;
+    }
+  }
+  // if we've made it this far, nothing is in our path.
+  return 1;
+};
+
+// Master function to call
+isMoveLegal = function(type,curFile,curRank,tarFile,tarRank) {
+
+  result=pieceMoveRules[type](curFile,curRank,tarFile,tarRank);
+  return result;
+
+}

@@ -1,6 +1,3 @@
-// Some global objects
-var allPieces = new Array;
-var turn = 0;
 
 // Create the canvas
 var canvas = document.createElement("canvas");
@@ -147,7 +144,13 @@ function boardClick(e) {
     }
     // TODO: Check legality of move
     ruleResult = isMoveLegal(allPieces[selection.color][selection.pi].type,selection.file,selection.rank,square.file, square.rank);
-    if (ruleResult == 0){ return; }
+    if (ruleResult == 0){ return; } // Illegal move
+    if (castleFlag >= 0){
+      // looks like we're castling
+      allPieces[turn][12+castleFlag].move({file:(square.file+1-2*castleFlag),rank:square.rank});
+      castleFlag=-1;
+      castling[turn]=[0,0];
+    }
     // TODO: Check for special moves - promotion, castling
     // Next check for capture
     matched_pi=checkForPiece(square,1-turn);
@@ -166,7 +169,16 @@ function boardClick(e) {
     selection.made=0;
     if (allPieces[turn][selection.pi].type == 0){
       checkPawnPromote(turn,selection.pi);
+    } else if ((castling[turn][0] || castling[turn][1])){
+      // check if we're voiding castling
+      if (allPieces[turn][selection.pi].type == 5){
+	castling[turn]=[0,0];
+      } else if (allPieces[turn][selection.pi].type == 3){
+	castleSide = Math.floor(allPieces[turn][selection.pi].file / 7);
+	castling[turn][castleSide]=0;
+      }
     }
+      
     // switch turn
     turn=1-turn;
 

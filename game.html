@@ -7,12 +7,23 @@
   <script src="js/jquery/jquery-1.10.2.js"></script>
   <script src="js/jquery/jquery-ui-1.10.4.custom.min.js"></script>
   <script src="js/promote_dialog.js"></script>
+  <script src="js/controls.js"></script>
 </head>
 <body>
-
-  <div id="promote_dialog" title="Promotion">Select your piece</div>
-  <script src="js/global_declares.js"></script>
-  <script src="js/move_rules.js"></script>
-  <script src="js/game.js"></script>
-  </body>
+  <div id="game_space" style="height:700px;width:700px;float:left;">
+    <div id="promote_dialog" title="Promotion">Select your piece</div>
+    <script src="js/global_declares.js"></script>
+    <script src="js/move_rules.js"></script>
+    <script src="js/game.js"></script>
+  </div>
+  <div id="controls" style="height:680px;width:100pxfloat:left;">
+    <h1> A Simple Chess Game </h1>
+    <p> One small twist. When a piece captures, it becomes what it
+    captured. For example, if a queen captures a pawn, it will become
+    a pawn. </p>
+    <p><input type="flip" value="Flip Board" style="width:100px"></p>
+    <p><input type="reset" value="Reset" style="width:100px"></p>
+  </div>
+  
+</body>
 </html>

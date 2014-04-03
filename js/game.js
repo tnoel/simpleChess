@@ -2,12 +2,13 @@
 // Create the canvas
 var canvas = document.createElement("canvas");
 var ctx = canvas.getContext("2d");
+var objTo = document.getElementById('game_space')
 board_size=640;
-edge_size=2;
+edge_size=20;
 square_size=board_size/8;
 canvas.width = board_size+2*edge_size;
 canvas.height = canvas.width;
-document.body.appendChild(canvas);
+objTo.appendChild(canvas);
 canvas.addEventListener("click",boardClick,false);
 
 // Background image
@@ -16,7 +17,7 @@ var bgImage = new Image();
 bgImage.onload = function () {
 	bgReady = true;
 };
-bgImage.src = "images/background_bw.png";
+bgImage.src = "images/background_brown.png";
 
 // Some book keeping for the pieces
 colors=["white","black"];
@@ -37,10 +38,18 @@ for (var ci=0;ci<ncolors;ci++){
 
 // functions for getting x and y values from file/rank
 x = function() {
-  return this.file*square_size + edge_size;
+  if (board_flipped){
+    return (7-this.file)*square_size + edge_size;
+  } else {
+    return this.file*square_size + edge_size;
+  }
 };
 y = function() {
-  return this.rank*square_size + edge_size;
+  if (board_flipped){
+    return (7-this.rank)*square_size + edge_size;
+  } else {
+    return this.rank*square_size + edge_size;
+  }
 };
 
 // Selection object (for highlighting the selected square
@@ -103,7 +112,11 @@ function getCursorPosition(e) {
   y -= canvas.offsetTop+edge_size+2;
   x = Math.min(x, board_size);
   y = Math.min(y, board_size);
-  var square = { file: Math.floor(x/square_size), rank:Math.floor(y/square_size)}
+  if (board_flipped){
+    var square = { file: (7-Math.floor(x/square_size)), rank:(7-Math.floor(y/square_size))}
+  } else {
+    var square = { file: Math.floor(x/square_size), rank:Math.floor(y/square_size)}
+  }
   return square;
 };
 
@@ -142,7 +155,7 @@ function boardClick(e) {
       selection.select(turn,matched_pi);
       return;
     }
-    // TODO: Check legality of move
+    // Check legality of move
     ruleResult = isMoveLegal(allPieces[selection.color][selection.pi].type,selection.file,selection.rank,square.file, square.rank);
     if (ruleResult == 0){ return; } // Illegal move
     if (castleFlag >= 0){
@@ -151,7 +164,6 @@ function boardClick(e) {
       castleFlag=-1;
       castling[turn]=[0,0];
     }
-    // TODO: Check for special moves - promotion, castling
     // Next check for capture
     matched_pi=checkForPiece(square,1-turn);
     if (matched_pi >= 0) {
@@ -189,7 +201,6 @@ function boardClick(e) {
       selection.select(turn,matched_pi);
     }
   }
-  //selection.select(square.file,square.rank);
 }
 
 var reset = function () {
@@ -217,7 +228,7 @@ var reset = function () {
     allPieces[ci][14] = new piece(ci,4,3,piece_rank); // q
     allPieces[ci][15] = new piece(ci,5,4,piece_rank); // k
   }
-
+  turn=0;
   render();
 };
 

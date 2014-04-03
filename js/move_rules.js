@@ -96,6 +96,7 @@ checkKingMoveRules = function(curFile,curRank,tarFile,tarRank) {
     if (castling[turn][castleSide]){
       // castling is allowed, just need to check the paths.
       if (checkPath(curFile,curRank,7*castleSide,kingHomeRank)){
+	// TODO: Check the we're not moving in/out of check
 	// all clear
 	castleFlag = castleSide;
 	return 1;

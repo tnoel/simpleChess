@@ -86,6 +86,7 @@ function piece(color,type,file,rank) {
     this.file=square.file;
     this.rank=square.rank;
   };
+  this.angle=0;
   this.capture = function() {
     this.file=-2; // Just move the piece off the playable area
     this.rank=-2;
@@ -170,8 +171,10 @@ function boardClick(e) {
       // Capture a piece!
       allPieces[1-turn][matched_pi].capture();
       // // // The crux of the game!! piece becomes what it captured! // // //
-      if (allPieces[turn][selection.pi].type != 5){ // not a king
-	allPieces[turn][selection.pi].changeType(allPieces[1-turn][matched_pi].type);
+      if ($('input:radio[name=game_mode]:checked').val() == 'variation'){
+	if (allPieces[turn][selection.pi].type != 5){ // not a king
+	  allPieces[turn][selection.pi].changeType(allPieces[1-turn][matched_pi].type);
+	}
       }
     }
     // Move selected piece
@@ -229,6 +232,7 @@ var reset = function () {
     allPieces[ci][15] = new piece(ci,5,4,piece_rank); // k
   }
   turn=0;
+  raged=0;
   render();
 };
 
@@ -248,9 +252,23 @@ var render = function () {
 	  ctx.drawImage(new_pos.image,new_pos.x(),new_pos.y());
 	}
 
-	for (var ci=0;ci<ncolors;ci++){
-	  for (var i=0;i<16;i++){
-	    ctx.drawImage(allPieces[ci][i].image,allPieces[ci][i].x(),allPieces[ci][i].y());
+	if (raged == 1){
+	  for (var ci=0;ci<ncolors;ci++){
+	    for (var i=0;i<16;i++){
+	      ctx.save();
+	      angle_temp = allPieces[ci][i].angle;
+	      ctx.rotate(angle_temp);
+	      xplot = allPieces[ci][i].x() * Math.cos(angle_temp) + allPieces[ci][i].y() * Math.sin(angle_temp);
+	      yplot = -allPieces[ci][i].x() * Math.sin(angle_temp) + allPieces[ci][i].y() * Math.cos(angle_temp);
+	      ctx.drawImage(allPieces[ci][i].image,xplot,yplot);
+	      ctx.restore();
+	    }
+	  }
+	} else {
+	  for (var ci=0;ci<ncolors;ci++){
+	    for (var i=0;i<16;i++){
+	      ctx.drawImage(allPieces[ci][i].image,allPieces[ci][i].x(),allPieces[ci][i].y());
+	    }
 	  }
 	}
 };
@@ -260,6 +278,7 @@ var main = function () {
   render();
 
 };
+
 
 // Let's play this game!
 reset();

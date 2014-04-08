@@ -12,3 +12,7 @@ Initial commit: So far the script is smart enough to handle the pieces, and even
 Promotion is now handled correctly. Had to add jquery, which will probably be helpful for other things too. Next step castling?
 
 Basic rules added. Most pieces will only move legally, notable exceptions: Castling, en passant, and no checking for check.
+
+Castling has been added. Also did some work to make the page look nicer. Added some game controls. There is also an option to play standard chess.
+
+TODO: en passant, check for check. Those are the big ones for now.

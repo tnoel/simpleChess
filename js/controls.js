@@ -1,5 +1,5 @@
 $(function() {
-    $( "input[type=flip], a, button" )
+    $( "#flip" )
       .button()
       .click(function( event ) {
 	  if ($(this).prop('value') == 'Rage Quit!'){
@@ -18,7 +18,7 @@ $(function() {
   });
 
 $(function() {
-    $( "input[type=reset], a, button" )
+    $( "#reset" )
       .button()
       .click(function(event){
 	  reset();

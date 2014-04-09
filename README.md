@@ -15,4 +15,6 @@ Basic rules added. Most pieces will only move legally, notable exceptions: Castl
 
 Castling has been added. Also did some work to make the page look nicer. Added some game controls. There is also an option to play standard chess.
 
-TODO: en passant, check for check. Those are the big ones for now.
+Added en passant. Need to do more testing though.
+
+TODO: check for check. Those are the big ones for now.

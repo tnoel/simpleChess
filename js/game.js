@@ -165,6 +165,11 @@ function boardClick(e) {
       castleFlag=-1;
       castling[turn]=[0,0];
     }
+    if (enPassantTaken == 1){
+      // we are en passanting.
+      matched_pi=checkForPiece({file:square.file,rank:selection.rank},1-turn);
+      allPieces[1-turn][matched_pi].capture();
+    }
     // Next check for capture
     matched_pi=checkForPiece(square,1-turn);
     if (matched_pi >= 0) {
@@ -233,6 +238,7 @@ var reset = function () {
   }
   turn=0;
   raged=0;
+  enPassantFlag=-1;
   render();
 };
 

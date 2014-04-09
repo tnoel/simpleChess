@@ -2,8 +2,12 @@
   
 checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank) {
   // TODO: first check special case of en passant
-
-  // very differnt if in capture mode or not
+  if ((enPassantFlag >= 0) && (Math.abs(curFile-enPassantFlag) == 1) && (curRank == 3+turn) && (tarRank == 2+2*turn) && (tarFile == enPassantFlag)){
+    // Looks like we're trying to en passant
+    enPassantTaken=1;
+    return 1;
+  }
+  // very different if in capture mode or not
   targetSquare={file: tarFile, rank: tarRank};
   matched_pi=checkForPiece(targetSquare,1-turn);
   if (matched_pi >= 0) {
@@ -30,6 +34,8 @@ checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank) {
 	  match2=checkForPiece({file:curFile,rank:oneForward},1-turn);
 	  if ((match1<0) && (match2<0)){
 	    // TODO: Throw en passant flag!
+	    enPassantFlag = curFile;
+	    enPassantThrown=1;
 	    return 1;
 	  }
 	}
@@ -136,9 +142,12 @@ checkPath = function(curFile,curRank,tarFile,tarRank) {
 
 // Master function to call
 isMoveLegal = function(type,curFile,curRank,tarFile,tarRank) {
-
+  enPassantThrown=0
+  enPassantTaken=0
   result=pieceMoveRules[type](curFile,curRank,tarFile,tarRank);
-
+  if ((enPassantThrown == 0) && (result == 1)){
+    enPassantFlag=-1; // reset en passant flag
+  }
   // TODO: Does this result in own player in check?
 
   return result;

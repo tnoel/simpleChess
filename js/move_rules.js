@@ -102,8 +102,16 @@ checkKingMoveRules = function(curFile,curRank,tarFile,tarRank,pieces) {
     if (castling[turn][castleSide]){
       // castling is allowed, just need to check the paths.
       if (checkPath(curFile,curRank,7*castleSide,kingHomeRank,pieces)){
-	// TODO: Check the we're not moving in/out of check
-	// all clear
+	// Check the we're not moving out of or through check
+	// are we currently in check?
+	inCheck = checkForCheck(turn,pieces);
+	if (inCheck == 1) {return 0;} // if in check, can't castle
+	// check that we're not in check in between
+	tempPieces = clonePieces(pieces);
+	tempPieces[turn][15].move({file:kingHomeFile+2*castleSide-1,rank:kingHomeRank});
+	inCheck = checkForCheck(turn,tempPieces);
+	if (inCheck == 1) {return 0;} // tried to move through check
+	// final position will be checked later in master function.
 	castleFlag = castleSide;
 	return 1;
       }

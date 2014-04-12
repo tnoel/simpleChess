@@ -64,8 +64,8 @@ function select_class() {
   this.x = x;
   this.y = y;
   this.select = function(color,pi){
-    this.file=allPieces[color][pi].file;
-    this.rank=allPieces[color][pi].rank;
+    this.file=livePieces[color][pi].file;
+    this.rank=livePieces[color][pi].rank;
     this.color=color;
     this.pi=pi;
     this.made=1;
@@ -97,6 +97,22 @@ function piece(color,type,file,rank) {
   }
 }
 
+// A function for cloning the pieces (maybe useful for AI later?)
+clonePieces = function(pieces){
+  var newPieces = new Array;
+  for (ci=0;ci<2;ci++){
+    newPieces[ci] = new Array(16);
+    for (pi=0;pi<16;pi++){
+      newPieces[ci][pi] = cloneOnePiece(pieces[ci][pi]);
+    }
+  }
+  return newPieces;
+};
+cloneOnePiece = function(pieceToClone){
+  newPiece = new piece(pieceToClone.color,pieceToClone.type,pieceToClone.file,pieceToClone.rank);
+  return newPiece;
+}
+
 function getCursorPosition(e) {
   // hopefully return the .file and .rank of the clicked square
   var x;
@@ -121,10 +137,10 @@ function getCursorPosition(e) {
   return square;
 };
 
-function checkForPiece(square,color) {
+function checkForPiece(square,color,pieces) {
   // function to check whether a piece is on a square
   for (var pi=0;pi<16;pi++) {
-    if (allPieces[color][pi].rank == square.rank && allPieces[color][pi].file == square.file) {
+    if (pieces[color][pi].rank == square.rank && pieces[color][pi].file == square.file) {
       // we have a match!
       return pi;
     }
@@ -133,12 +149,12 @@ function checkForPiece(square,color) {
   return -1;
 };
 
-function checkPawnPromote(color,pi) {
+function checkPawnPromote(color,pi,pieces) {
   // check if pawn should be promoted, and if so promote it
-  curRank=allPieces[color][pi].rank;
+  curRank=pieces[color][pi].rank;
   if (curRank == 7*color) {
     // it has reached the opposite rank, promote the sucker.
-    var promote_type=$('#promote_dialog').dialog("open"); // launches dialog and changes piece type
+    return 1;
   }
 }
 
@@ -151,50 +167,52 @@ function boardClick(e) {
   if (selection.made) {
     // selection was already made, move a piece, or the selection
     // First check for re-selection
-    matched_pi=checkForPiece(square,turn);
+    matched_pi=checkForPiece(square,turn,livePieces);
     if (matched_pi >= 0) {
       selection.select(turn,matched_pi);
       return;
     }
     // Check legality of move
-    ruleResult = isMoveLegal(allPieces[selection.color][selection.pi].type,selection.file,selection.rank,square.file, square.rank);
+    ruleResult = isMoveLegal(livePieces[selection.color][selection.pi].type,selection.file,selection.rank,square.file, square.rank,livePieces);
     if (ruleResult == 0){ return; } // Illegal move
     if (castleFlag >= 0){
       // looks like we're castling
-      allPieces[turn][12+castleFlag].move({file:(square.file+1-2*castleFlag),rank:square.rank});
+      livePieces[turn][12+castleFlag].move({file:(square.file+1-2*castleFlag),rank:square.rank});
       castleFlag=-1;
       castling[turn]=[0,0];
     }
     if (enPassantTaken == 1){
       // we are en passanting.
-      matched_pi=checkForPiece({file:square.file,rank:selection.rank},1-turn);
-      allPieces[1-turn][matched_pi].capture();
+      matched_pi=checkForPiece({file:square.file,rank:selection.rank},1-turn,livePieces);
+      livePieces[1-turn][matched_pi].capture();
     }
     // Next check for capture
-    matched_pi=checkForPiece(square,1-turn);
+    matched_pi=checkForPiece(square,1-turn,livePieces);
     if (matched_pi >= 0) {
       // Capture a piece!
-      allPieces[1-turn][matched_pi].capture();
+      livePieces[1-turn][matched_pi].capture();
       // // // The crux of the game!! piece becomes what it captured! // // //
       if ($('input:radio[name=game_mode]:checked').val() == 'variation'){
-	if (allPieces[turn][selection.pi].type != 5){ // not a king
-	  allPieces[turn][selection.pi].changeType(allPieces[1-turn][matched_pi].type);
+	if (livePieces[turn][selection.pi].type != 5){ // not a king
+	  livePieces[turn][selection.pi].changeType(livePieces[1-turn][matched_pi].type);
 	}
       }
     }
     // Move selected piece
     old_pos.select(selection.color,selection.pi);
-    allPieces[turn][selection.pi].move(square);
+    livePieces[turn][selection.pi].move(square);
     new_pos.select(selection.color,selection.pi);
     selection.made=0;
-    if (allPieces[turn][selection.pi].type == 0){
-      checkPawnPromote(turn,selection.pi);
+    if (livePieces[turn][selection.pi].type == 0){
+      if (checkPawnPromote(turn,selection.pi,livePieces)){
+	var promote_type=$('#promote_dialog').dialog("open");
+      }
     } else if ((castling[turn][0] || castling[turn][1])){
       // check if we're voiding castling
-      if (allPieces[turn][selection.pi].type == 5){
+      if (livePieces[turn][selection.pi].type == 5){
 	castling[turn]=[0,0];
-      } else if (allPieces[turn][selection.pi].type == 3){
-	castleSide = Math.floor(allPieces[turn][selection.pi].file / 7);
+      } else if (livePieces[turn][selection.pi].type == 3){
+	castleSide = Math.floor(livePieces[turn][selection.pi].file / 7);
 	castling[turn][castleSide]=0;
       }
     }
@@ -204,7 +222,7 @@ function boardClick(e) {
 
   } else {
     // Fresh selection. Check if piece is here.
-    matched_pi=checkForPiece(square,turn); // use turn for color to match
+    matched_pi=checkForPiece(square,turn,livePieces); // use turn for color to match
     if (matched_pi >= 0) {
       selection.select(turn,matched_pi);
     }
@@ -219,22 +237,22 @@ var reset = function () {
 
   // reset/initialize pieces
   for (var ci=0;ci<ncolors;ci++){
-    allPieces[ci] = new Array(16);
+    livePieces[ci] = new Array(16);
     piece_rank = 7*(1-ci); // Assuming white on bottom
     pawn_rank = piece_rank + 2*ci - 1; // hacky hacky hacky
     for (var pi=0;pi<8;pi++){
       // First 8 are pawns
-      allPieces[ci][pi] = new piece(ci,0,pi,pawn_rank);
+      livePieces[ci][pi] = new piece(ci,0,pi,pawn_rank);
     }
     // The rest just do by hand
-    allPieces[ci][8]  = new piece(ci,1,2,piece_rank); // q's bishop
-    allPieces[ci][9]  = new piece(ci,1,5,piece_rank); // k's bishop
-    allPieces[ci][10] = new piece(ci,2,1,piece_rank); // q's knight
-    allPieces[ci][11] = new piece(ci,2,6,piece_rank); // k's knight
-    allPieces[ci][12] = new piece(ci,3,0,piece_rank); // q's rook
-    allPieces[ci][13] = new piece(ci,3,7,piece_rank); // k's rook
-    allPieces[ci][14] = new piece(ci,4,3,piece_rank); // q
-    allPieces[ci][15] = new piece(ci,5,4,piece_rank); // k
+    livePieces[ci][8]  = new piece(ci,1,2,piece_rank); // q's bishop
+    livePieces[ci][9]  = new piece(ci,1,5,piece_rank); // k's bishop
+    livePieces[ci][10] = new piece(ci,2,1,piece_rank); // q's knight
+    livePieces[ci][11] = new piece(ci,2,6,piece_rank); // k's knight
+    livePieces[ci][12] = new piece(ci,3,0,piece_rank); // q's rook
+    livePieces[ci][13] = new piece(ci,3,7,piece_rank); // k's rook
+    livePieces[ci][14] = new piece(ci,4,3,piece_rank); // q
+    livePieces[ci][15] = new piece(ci,5,4,piece_rank); // k
   }
   turn=0;
   raged=0;
@@ -262,18 +280,18 @@ var render = function () {
 	  for (var ci=0;ci<ncolors;ci++){
 	    for (var i=0;i<16;i++){
 	      ctx.save();
-	      angle_temp = allPieces[ci][i].angle;
+	      angle_temp = livePieces[ci][i].angle;
 	      ctx.rotate(angle_temp);
-	      xplot = allPieces[ci][i].x() * Math.cos(angle_temp) + allPieces[ci][i].y() * Math.sin(angle_temp);
-	      yplot = -allPieces[ci][i].x() * Math.sin(angle_temp) + allPieces[ci][i].y() * Math.cos(angle_temp);
-	      ctx.drawImage(allPieces[ci][i].image,xplot,yplot);
+	      xplot = livePieces[ci][i].x() * Math.cos(angle_temp) + livePieces[ci][i].y() * Math.sin(angle_temp);
+	      yplot = -livePieces[ci][i].x() * Math.sin(angle_temp) + livePieces[ci][i].y() * Math.cos(angle_temp);
+	      ctx.drawImage(livePieces[ci][i].image,xplot,yplot);
 	      ctx.restore();
 	    }
 	  }
 	} else {
 	  for (var ci=0;ci<ncolors;ci++){
 	    for (var i=0;i<16;i++){
-	      ctx.drawImage(allPieces[ci][i].image,allPieces[ci][i].x(),allPieces[ci][i].y());
+	      ctx.drawImage(livePieces[ci][i].image,livePieces[ci][i].x(),livePieces[ci][i].y());
 	    }
 	  }
 	}

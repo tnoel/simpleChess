@@ -1,6 +1,6 @@
 
   
-checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank) {
+checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank,pieces) {
   // TODO: first check special case of en passant
   if ((enPassantFlag >= 0) && (Math.abs(curFile-enPassantFlag) == 1) && (curRank == 3+turn) && (tarRank == 2+2*turn) && (tarFile == enPassantFlag)){
     // Looks like we're trying to en passant
@@ -9,7 +9,7 @@ checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank) {
   }
   // very different if in capture mode or not
   targetSquare={file: tarFile, rank: tarRank};
-  matched_pi=checkForPiece(targetSquare,1-turn);
+  matched_pi=checkForPiece(targetSquare,1-turn,pieces);
   if (matched_pi >= 0) {
     // capture mode
     if (Math.abs(curFile-tarFile) == 1){
@@ -30,8 +30,8 @@ checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank) {
 	twoForward = curRank + (4*turn-2);
 	if (tarRank == twoForward){
 	  // check to be sure we're not jumping over someone
-	  match1=checkForPiece({file:curFile,rank:oneForward},turn);
-	  match2=checkForPiece({file:curFile,rank:oneForward},1-turn);
+	  match1=checkForPiece({file:curFile,rank:oneForward},turn,pieces);
+	  match2=checkForPiece({file:curFile,rank:oneForward},1-turn,pieces);
 	  if ((match1<0) && (match2<0)){
 	    // TODO: Throw en passant flag!
 	    enPassantFlag = curFile;
@@ -45,18 +45,18 @@ checkPawnMoveRules = function(curFile,curRank,tarFile,tarRank) {
   return 0; // otherwise it wasn't legal
 };
   
-checkBishopMoveRules = function(curFile,curRank,tarFile,tarRank) {
+checkBishopMoveRules = function(curFile,curRank,tarFile,tarRank,pieces) {
   // First check if it's diagonal
   if (Math.abs(curFile-tarFile) == Math.abs(curRank-tarRank)){
     // Then check the path
-    if (checkPath(curFile,curRank,tarFile,tarRank)) {
+    if (checkPath(curFile,curRank,tarFile,tarRank,pieces)) {
       return 1;
     }
   }
   return 0; // otherwise illegal
 };
   
-checkKnightMoveRules = function(curFile,curRank,tarFile,tarRank) {
+checkKnightMoveRules = function(curFile,curRank,tarFile,tarRank,pieces) {
   dFile = Math.abs(curFile-tarFile);
   dRank = Math.abs(curRank-tarRank);
   if (((dFile == 1) && (dRank == 2)) || ((dFile == 2) && (dRank == 1))) {
@@ -65,31 +65,31 @@ checkKnightMoveRules = function(curFile,curRank,tarFile,tarRank) {
   return 0; // otherwise illegal
 };
   
-checkRookMoveRules = function(curFile,curRank,tarFile,tarRank) {
+checkRookMoveRules = function(curFile,curRank,tarFile,tarRank,pieces) {
   // check that it's horizontal or vertical
   if ((curFile == tarFile) || (curRank == tarRank)) {
     // Check path
-    if (checkPath(curFile,curRank,tarFile,tarRank)) {
+    if (checkPath(curFile,curRank,tarFile,tarRank,pieces)) {
       return 1;
     }
   }
   return 0; // otherwise illegal
 };
   
-checkQueenMoveRules = function(curFile,curRank,tarFile,tarRank) {
+checkQueenMoveRules = function(curFile,curRank,tarFile,tarRank,pieces) {
   // check diagonal or horizontal or vertical
   diag = Math.abs(curFile-tarFile) == Math.abs(curRank-tarRank);
   horizvert = (curFile == tarFile) || (curRank == tarRank);
   if (diag || horizvert){
     // Then check the path
-    if (checkPath(curFile,curRank,tarFile,tarRank)) {
+    if (checkPath(curFile,curRank,tarFile,tarRank,pieces)) {
       return 1;
     }
   }
   return 0; // otherwise illegal
 };
   
-checkKingMoveRules = function(curFile,curRank,tarFile,tarRank) {
+checkKingMoveRules = function(curFile,curRank,tarFile,tarRank,pieces) {
   dFile = Math.abs(curFile-tarFile);
   dRank = Math.abs(curRank-tarRank);
 
@@ -101,7 +101,7 @@ checkKingMoveRules = function(curFile,curRank,tarFile,tarRank) {
     castleSide = (sign(curFile-tarFile)==1) ? 0 : 1; // 0 for queenside, 1 for kingside
     if (castling[turn][castleSide]){
       // castling is allowed, just need to check the paths.
-      if (checkPath(curFile,curRank,7*castleSide,kingHomeRank)){
+      if (checkPath(curFile,curRank,7*castleSide,kingHomeRank,pieces)){
 	// TODO: Check the we're not moving in/out of check
 	// all clear
 	castleFlag = castleSide;
@@ -121,14 +121,14 @@ var pieceMoveRules =  new Array(checkPawnMoveRules, checkBishopMoveRules, checkK
 
 sign = function(x) { return x > 0 ? 1 : x < 0 ? -1 : 0; };
 
-checkPath = function(curFile,curRank,tarFile,tarRank) {
+checkPath = function(curFile,curRank,tarFile,tarRank,pieces) {
   deltaFile=sign(tarFile-curFile);
   deltaRank=sign(tarRank-curRank);
   tempFile=curFile+deltaFile;
   tempRank=curRank+deltaRank;
   while ((tempFile != tarFile) || (tempRank != tarRank)){
-    match1=checkForPiece({file:tempFile,rank:tempRank},turn);
-    match2=checkForPiece({file:tempFile,rank:tempRank},1-turn);
+    match1=checkForPiece({file:tempFile,rank:tempRank},turn,pieces);
+    match2=checkForPiece({file:tempFile,rank:tempRank},1-turn,pieces);
     if ((match1 >= 0) || match2 >= 0){
       return 0;
     } else {
@@ -141,15 +141,61 @@ checkPath = function(curFile,curRank,tarFile,tarRank) {
 };
 
 // Master function to call
-isMoveLegal = function(type,curFile,curRank,tarFile,tarRank) {
+isMoveLegal = function(type,curFile,curRank,tarFile,tarRank,pieces) {
   enPassantThrown=0
   enPassantTaken=0
-  result=pieceMoveRules[type](curFile,curRank,tarFile,tarRank);
+  result=pieceMoveRules[type](curFile,curRank,tarFile,tarRank,pieces);
   if ((enPassantThrown == 0) && (result == 1)){
     enPassantFlag=-1; // reset en passant flag
   }
-  // TODO: Does this result in own player in check?
+  // jump out now if move is illegal
+  if (result == 0) { return result;}
 
-  return result;
+  // check if moving into check
+  // first make a copy of pieces and theoretically move the piece
+  tempPieces = clonePieces(pieces);
+  piece_pi = checkForPiece({file:curFile,rank:curRank},turn,tempPieces)
+  if (castleFlag >= 0){
+    // looks like we're castling
+    tempPieces[turn][12+castleFlag].move({file:(tarFile+1-2*castleFlag),rank:tarRank});
+  }
+  if (enPassantTaken == 1){
+    // we are en passanting.
+    matched_pi=checkForPiece({file:tarFile,rank:curRank},1-turn,tempPieces);
+    tempPieces[1-turn][matched_pi].capture();
+  }
+  // Next check for capture
+  matched_pi=checkForPiece({file:tarFile,rank:tarRank},1-turn,tempPieces);
+  if (matched_pi >= 0) {
+    // Capture a piece!
+    tempPieces[1-turn][matched_pi].capture();
+    // // // The crux of the game!! piece becomes what it captured! // // //
+    if ($('input:radio[name=game_mode]:checked').val() == 'variation'){
+      if (tempPieces[turn][selection.pi].type != 5){ // not a king
+	  tempPieces[turn][selection.pi].changeType(tempPieces[1-turn][matched_pi].type);
+      }
+    }
+  }
+  // Move selected piece
+  tempPieces[turn][selection.pi].move({file:tarFile,rank:tarRank});
+  // now we can check for check
+  result = checkForCheck(turn,tempPieces)
+  return 1-result;
+
+}
+
+checkForCheck = function(color,piecesToCheck){
+  tarFile = piecesToCheck[color][15].file; // king's location
+  tarRank = piecesToCheck[color][15].rank;
+  for (pi=0;pi<16;pi++){
+    if (piecesToCheck[1-color][pi].file > 0){ // just make sure the piece isn't already captured!
+      curFile = piecesToCheck[1-color][pi].file;
+      curRank = piecesToCheck[1-color][pi].rank;
+      type = piecesToCheck[1-color][pi].type;
+      result=pieceMoveRules[type](curFile,curRank,tarFile,tarRank,piecesToCheck);
+      if (result == 1) {return 1};
+    }
+  }
+  return 0; // no check if we got this far.
 
 }

@@ -30,5 +30,5 @@ $("#promote_dialog").dialog({
   });
   });
 function callback(type){
-  allPieces[selection.color][selection.pi].changeType(type);
+  livePieces[selection.color][selection.pi].changeType(type);
 }

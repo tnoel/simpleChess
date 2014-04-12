@@ -196,7 +196,7 @@ checkForCheck = function(color,piecesToCheck){
   tarFile = piecesToCheck[color][15].file; // king's location
   tarRank = piecesToCheck[color][15].rank;
   for (pi=0;pi<16;pi++){
-    if (piecesToCheck[1-color][pi].file > 0){ // just make sure the piece isn't already captured!
+    if (piecesToCheck[1-color][pi].file >= 0){ // just make sure the piece isn't already captured!
       curFile = piecesToCheck[1-color][pi].file;
       curRank = piecesToCheck[1-color][pi].rank;
       type = piecesToCheck[1-color][pi].type;

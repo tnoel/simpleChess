@@ -17,7 +17,7 @@ Castling has been added. Also did some work to make the page look nicer. Added s
 
 Added en passant. Need to do more testing though.
 
-Added checking for check.
+Added checking for check. 
 
 TODO: Logging - allow to move back/forth.
 TODO: more cleanup to allow for AI. There are a few things that are hard coded to act on the live pieces, and I need to change that to be able to try moves with the AI.
